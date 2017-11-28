@@ -27,6 +27,10 @@
 #define NFD_DAEMON_FACE_UDP_CHANNEL_HPP
 
 #include "channel.hpp"
+#include <android/log.h>
+
+#define LOG_TAG "DEBUG_TAG"
+#define LOGI(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 
 namespace nfd {
 

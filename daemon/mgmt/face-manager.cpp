@@ -49,9 +49,14 @@
 #include "face/websocket-factory.hpp"
 #endif // HAVE_WEBSOCKET
 
+#include "face/dtn-factory.hpp"
+
+
+
 namespace nfd {
 
 NFD_LOG_INIT("FaceManager");
+bool fml = false;
 
 FaceManager::FaceManager(FaceTable& faceTable, Dispatcher& dispatcher, CommandAuthenticator& authenticator)
   : NfdManagerBase(dispatcher, authenticator, "faces")
@@ -104,8 +109,8 @@ FaceManager::createFace(const Name& topPrefix, const Interest& interest,
     done(ControlResponse(400, "Non-canonical URI"));
     return;
   }
-
   auto factory = m_factories.find(uri.getScheme());
+
   if (factory == m_factories.end()) {
     NFD_LOG_TRACE("received create request for unsupported protocol");
     done(ControlResponse(406, "Unsupported protocol"));
@@ -113,6 +118,7 @@ FaceManager::createFace(const Name& topPrefix, const Interest& interest,
   }
 
   try {
+
     factory->second->createFace(uri,
                                 parameters.getFacePersistency(),
                                 parameters.hasFlagBit(ndn::nfd::BIT_LOCAL_FIELDS_ENABLED) ?
@@ -545,6 +551,7 @@ FaceManager::processConfig(const ConfigSection& configSection,
   bool hasSeenUdp = false;
   bool hasSeenEther = false;
   bool hasSeenWebSocket = false;
+  bool hasSeenDtn = false;
   auto nicList = listNetworkInterfaces();
 
   for (const auto& item : configSection) {
@@ -587,6 +594,14 @@ FaceManager::processConfig(const ConfigSection& configSection,
       hasSeenWebSocket = true;
 
       processSectionWebSocket(item.second, isDryRun);
+    }
+    else if (item.first == "dtn") {
+      if (hasSeenDtn) {
+        BOOST_THROW_EXCEPTION(Error("Duplicate \"dtn\" section"));
+      }
+      hasSeenDtn = true;
+
+      processSectionDtn(item.second, isDryRun);
     }
     else {
       BOOST_THROW_EXCEPTION(Error("Unrecognized option \"" + item.first + "\""));
@@ -720,7 +735,6 @@ FaceManager::processSectionUdp(const ConfigSection& configSection, bool isDryRun
   //   mcast_port 56363 ; UDP multicast port number
   //   mcast_group 224.0.23.170 ; UDP multicast group (IPv4 only)
   // }
-
   uint16_t port = 6363;
   bool enableV4 = true;
   bool enableV6 = true;
@@ -1014,6 +1028,48 @@ FaceManager::processSectionWebSocket(const ConfigSection& configSection, bool is
   BOOST_THROW_EXCEPTION(ConfigFile::Error("NFD was compiled without WebSocket, "
                                           "cannot process \"websocket\" section"));
 #endif // HAVE_WEBSOCKET
+}
+
+void
+FaceManager::processSectionDtn(const ConfigSection& configSection, bool isDryRun)
+{
+  std::string ibrdtndHost = "localhost";
+  uint16_t ibrdtndPort = 4550;
+  std::string endpointPrefix = "";
+  std::string endpointAffix = "nfd";
+
+  for (const auto& i : configSection) {
+	  if (i.first == "host") {
+		  ibrdtndHost = i.second.get_value<std::string>();
+		  NFD_LOG_TRACE("IBRDTND host set to " << ibrdtndHost);
+	  }
+	  else if (i.first == "port") {
+		  ibrdtndPort = ConfigFile::parseNumber<uint16_t>(i, "dtn");
+		  NFD_LOG_TRACE("IBRDTND port set to " << ibrdtndPort);
+	  }
+	  else if (i.first == "endpointPrefix") {
+		  endpointPrefix = i.second.get_value<std::string>();
+		  NFD_LOG_TRACE("IBRDTND endpoint prefix set to " << endpointPrefix);
+	  }
+	  else if (i.first == "endpointAffix") {
+		  endpointAffix = i.second.get_value<std::string>();
+		  NFD_LOG_TRACE("IBRDTND endpoint affix set to " << endpointAffix);
+	  }
+  }
+
+  if (!isDryRun) {
+    if (m_factories.count("dtn") > 0) {
+      return;
+    }
+    NFD_LOG_INFO("Setting up DTN");
+    shared_ptr<DtnFactory> factory = make_shared<DtnFactory>();
+    m_factories.insert(std::make_pair("dtn", factory));
+    // Create channel
+    shared_ptr<DtnChannel> dtnChannel = factory->createChannel(endpointPrefix, endpointAffix, ibrdtndHost, ibrdtndPort);
+
+    dtnChannel->listen(bind(&FaceTable::add, &m_faceTable, _1), nullptr);
+    NFD_LOG_INFO("DTN setup finished");
+  }
 }
 
 } // namespace nfd

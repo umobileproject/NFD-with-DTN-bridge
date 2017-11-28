@@ -28,8 +28,12 @@
 
 #include "transport.hpp"
 #include "core/global-io.hpp"
+#include <android/log.h>
 
 #include <array>
+#define LOG_TAG2 "DEBFIN_datagramTransport"
+
+#define  LOGD2(...)  __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG2, __VA_ARGS__)
 
 namespace nfd {
 namespace face {
@@ -59,6 +63,9 @@ public:
   void
   receiveDatagram(const uint8_t* buffer, size_t nBytesReceived,
                   const boost::system::error_code& error);
+
+  void
+  printPayload(const uint8_t* payload, int len);
 
 protected:
   virtual void
@@ -136,26 +143,32 @@ void
 DatagramTransport<T, U>::doSend(Transport::Packet&& packet)
 {
   NFD_LOG_FACE_TRACE(__func__);
-
+  //LOGD2("DatagramTransport::doSend (end of the line, boost follows)");
   m_socket.async_send(boost::asio::buffer(packet.packet),
                       bind(&DatagramTransport<T, U>::handleSend, this,
                            boost::asio::placeholders::error,
                            boost::asio::placeholders::bytes_transferred,
                            packet.packet));
 }
-
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 template<class T, class U>
 void
 DatagramTransport<T, U>::receiveDatagram(const uint8_t* buffer, size_t nBytesReceived,
                                          const boost::system::error_code& error)
 {
+  //LOGD2("DatagramTransport::receiveDatagram");
   if (error)
     return processErrorCode(error);
-
+  //LOGD2("DatagramTransport: Received: %zu Bytes(?)", nBytesReceived);
+  //LOGD2("TYPE IS: %d", buffer[0]);
+  std::string read(buffer,buffer+nBytesReceived);
+  //LOGD2("-------CONTENT IS: %s", read.c_str());
   NFD_LOG_FACE_TRACE("Received: " << nBytesReceived << " bytes");
 
   bool isOk = false;
   Block element;
+  //LOGD2("Create Block from Buffer");
+  //printPayload(buffer,nBytesReceived);
   std::tie(isOk, element) = Block::fromBuffer(buffer, nBytesReceived);
   if (!isOk) {
     NFD_LOG_FACE_WARN("Failed to parse incoming packet");
@@ -173,6 +186,26 @@ DatagramTransport<T, U>::receiveDatagram(const uint8_t* buffer, size_t nBytesRec
   tp.remoteEndpoint = makeEndpointId(m_sender);
   this->receive(std::move(tp));
 }
+
+template<class T, class U>
+void
+DatagramTransport<T, U>::printPayload(const uint8_t* payload,int len){
+
+    const uint8_t *temp = payload;
+    int iter = len/10;
+    for (int i  = 0; i < iter; i++){
+        LOGD2("%u %u %u %u %u %u %u %u %u %u", *temp,*(temp+1),*(temp+2),*(temp+3),*(temp+4),*(temp+5),*(temp+6),*(temp+7),*(temp+8),*(temp+9));
+        temp = temp + 10;
+    }
+
+    int rem = len%10;
+    for (int i = 0; i < rem; i++){
+        LOGD2("%u", *temp);
+        temp = temp + 1;
+    }
+
+}
+
 
 template<class T, class U>
 void

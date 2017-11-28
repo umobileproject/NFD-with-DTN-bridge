@@ -29,6 +29,8 @@
 #include <boost/property_tree/info_parser.hpp>
 #include <fstream>
 
+
+
 namespace nfd {
 
 ConfigFile::ConfigFile(UnknownConfigSectionHandler unknownSectionCallback)
@@ -42,6 +44,7 @@ ConfigFile::throwErrorOnUnknownSection(const std::string& filename,
                                        const ConfigSection& section,
                                        bool isDryRun)
 {
+
   std::string msg = "Error processing configuration file ";
   msg += filename;
   msg += ": no module subscribed for section \"" + sectionName + "\"";
@@ -55,7 +58,7 @@ ConfigFile::ignoreUnknownSection(const std::string& filename,
                                  const ConfigSection& section,
                                  bool isDryRun)
 {
-  // do nothing
+    // do nothing
 }
 
 bool
@@ -85,6 +88,7 @@ ConfigFile::addSectionHandler(const std::string& sectionName,
 void
 ConfigFile::parse(const std::string& filename, bool isDryRun)
 {
+
   std::ifstream inputFile(filename);
   if (!inputFile.good() || !inputFile.is_open()) {
     BOOST_THROW_EXCEPTION(Error("Failed to read configuration file: " + filename));
@@ -103,7 +107,7 @@ ConfigFile::parse(const std::string& input, bool isDryRun, const std::string& fi
 void
 ConfigFile::parse(std::istream& input, bool isDryRun, const std::string& filename)
 {
-  try {
+    try {
     boost::property_tree::read_info(input, m_global);
   }
   catch (const boost::property_tree::info_parser_error& error) {
@@ -127,6 +131,7 @@ ConfigFile::parse(const ConfigSection& config, bool isDryRun, const std::string&
 void
 ConfigFile::process(bool isDryRun, const std::string& filename) const
 {
+
   BOOST_ASSERT(!filename.empty());
 
   if (m_global.begin() == m_global.end()) {

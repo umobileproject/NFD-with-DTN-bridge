@@ -28,6 +28,8 @@
 #include "unicast-udp-transport.hpp"
 #include "core/global-io.hpp"
 
+
+
 namespace nfd {
 
 NFD_LOG_INIT("UdpChannel");
@@ -79,7 +81,6 @@ UdpChannel::listen(const FaceCreatedCallback& onFaceCreated,
     NFD_LOG_WARN("[" << m_localEndpoint << "] Already listening");
     return;
   }
-
   m_socket.open(m_localEndpoint.protocol());
   m_socket.set_option(ip::udp::socket::reuse_address(true));
   if (m_localEndpoint.address().is_v6())
@@ -144,10 +145,17 @@ UdpChannel::handleNewPeer(const boost::system::error_code& error,
 std::pair<bool, shared_ptr<Face>>
 UdpChannel::createFace(const udp::Endpoint& remoteEndpoint, ndn::nfd::FacePersistency persistency)
 {
+
+
+
+
   auto it = m_channelFaces.find(remoteEndpoint);
   if (it != m_channelFaces.end()) {
     // we already have a face for this endpoint, so reuse it
     auto face = it->second;
+
+
+
 
     // TODO #3232: Remove persistency transitions from faces/create
     // only on-demand -> persistent -> permanent transition is allowed

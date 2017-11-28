@@ -28,6 +28,7 @@
 
 #include "protocol-factory.hpp"
 #include "udp-channel.hpp"
+#include <android/log.h>
 
 namespace nfd {
 

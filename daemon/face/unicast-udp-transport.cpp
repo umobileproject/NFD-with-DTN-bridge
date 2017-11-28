@@ -33,6 +33,13 @@
 #include <sys/socket.h> // for setsockopt()
 #endif
 
+#include <android/log.h>
+#define LOG_TAG31 "DEBFIN_UDP"
+
+#define  LOGD31(...)  __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG31, __VA_ARGS__)
+
+
+
 namespace nfd {
 namespace face {
 
@@ -96,12 +103,16 @@ UnicastUdpTransport::beforeChangePersistency(ndn::nfd::FacePersistency newPersis
 void
 UnicastUdpTransport::scheduleClosureWhenIdle()
 {
+    LOGD31("UnicastUdpTransport::scheduleClosureWhenIdle()");
   m_closeIfIdleEvent = scheduler::schedule(m_idleTimeout, [this] {
     if (!hasBeenUsedRecently()) {
+        LOGD31("Closing due to inactivity");
       NFD_LOG_FACE_INFO("Closing due to inactivity");
+
       this->close();
     }
     else {
+        LOGD31("Not Closing due to recent activity");
       resetRecentUsage();
       scheduleClosureWhenIdle();
     }

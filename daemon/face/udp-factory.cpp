@@ -29,6 +29,10 @@
 #include "core/global-io.hpp"
 #include "core/network-interface.hpp"
 
+#define LOG_TAG4 "DEBLOK_UDP"
+
+#define  LOGD4(...)  __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG4, __VA_ARGS__)
+
 #ifdef __linux__
 #include <cerrno>       // for errno
 #include <cstring>      // for std::strerror()
@@ -93,7 +97,7 @@ UdpFactory::createChannel(const udp::Endpoint& endpoint,
                           const time::seconds& timeout)
 {
   NFD_LOG_DEBUG("Creating unicast channel " << endpoint);
-
+  //LOGD4("UdpFactory::createChannel");
   auto channel = findChannel(endpoint);
   if (channel)
     return channel;
@@ -237,6 +241,7 @@ UdpFactory::createFace(const FaceUri& uri,
                        const FaceCreatedCallback& onCreated,
                        const FaceCreationFailedCallback& onFailure)
 {
+  //LOGD4("UdpFactory::createFace------------------------------------!!!!!!!=============+!!!!!!!!!!!!!!!");
   BOOST_ASSERT(uri.isCanonical());
 
   if (persistency == ndn::nfd::FACE_PERSISTENCY_ON_DEMAND) {
@@ -272,6 +277,7 @@ UdpFactory::createFace(const FaceUri& uri,
   for (const auto& i : m_channels) {
     if ((i.first.address().is_v4() && endpoint.address().is_v4()) ||
         (i.first.address().is_v6() && endpoint.address().is_v6())) {
+      //LOGD4("UdpFactory::createFace --> connect");
       i.second->connect(endpoint, persistency, onCreated, onFailure);
       return;
     }

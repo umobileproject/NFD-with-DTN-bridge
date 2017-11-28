@@ -28,6 +28,8 @@
 #include "tcp-transport.hpp"
 #include "core/global-io.hpp"
 
+
+
 namespace nfd {
 
 NFD_LOG_INIT("TcpChannel");
@@ -103,6 +105,7 @@ TcpChannel::createFace(ip::tcp::socket&& socket,
 {
   shared_ptr<Face> face;
   tcp::Endpoint remoteEndpoint = socket.remote_endpoint();
+
 
   auto it = m_channelFaces.find(remoteEndpoint);
   if (it == m_channelFaces.end()) {

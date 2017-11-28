@@ -26,6 +26,12 @@
 #include "generic-link-service.hpp"
 #include <ndn-cxx/lp/tags.hpp>
 
+#include <android/log.h>
+
+#define LOG_TAGX "DEBFIN-DtnChannel"
+
+#define  LOGDX(...)  __android_log_print(ANDROID_LOG_DEBUG, LOG_TAGX, __VA_ARGS__)
+
 namespace nfd {
 namespace face {
 

@@ -39,6 +39,7 @@
 #include "mgmt/general-config-section.hpp"
 #include "mgmt/tables-config-section.hpp"
 
+
 namespace nfd {
 
 NFD_LOG_INIT("Nfd");

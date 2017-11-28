@@ -49,8 +49,9 @@ operator<<(std::ostream& os, TransportState state)
     return os << "NONE";
   }
 }
-
+// My: create Packet object
 Transport::Packet::Packet(Block&& packet1)
+    // initialise the two public variables of the Packet class
   : packet(std::move(packet1))
   , remoteEndpoint(0)
 {
@@ -114,7 +115,7 @@ Transport::send(Packet&& packet)
 
   this->doSend(std::move(packet));
 }
-
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 void
 Transport::receive(Packet&& packet)
 {

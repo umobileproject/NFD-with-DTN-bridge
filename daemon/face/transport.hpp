@@ -101,6 +101,8 @@ const ssize_t MTU_INVALID = -2;
 /** \brief the lower part of a Face
  *  \sa Face
  */
+ // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ //ONE
 class Transport : protected virtual TransportCounters, noncopyable
 {
 public:
@@ -110,8 +112,10 @@ public:
 
   /** \brief stores a packet along with the remote endpoint
    */
+   //TWO
   class Packet
   {
+  //THREE
   public:
     Packet() = default;
 

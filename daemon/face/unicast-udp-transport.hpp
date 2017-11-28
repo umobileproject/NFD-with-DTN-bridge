@@ -28,6 +28,7 @@
 
 #include "datagram-transport.hpp"
 #include "core/scheduler.hpp"
+#include <android/log.h>
 
 namespace nfd {
 namespace face {

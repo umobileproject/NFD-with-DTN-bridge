@@ -25,6 +25,10 @@
 
 #include "face.hpp"
 
+#define LOG_TAG9 "DEBLOB-Face"
+
+#define  LOGD9(...)  __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG9, __VA_ARGS__)
+
 namespace nfd {
 namespace face {
 
@@ -40,6 +44,7 @@ Face::Face(unique_ptr<LinkService> service, unique_ptr<Transport> transport)
 {
   m_service->setFaceAndTransport(*this, *m_transport);
   m_transport->setFaceAndLinkService(*this, *m_service);
+  //LOGD9("Face Constructor"); spams
 }
 
 std::ostream&
